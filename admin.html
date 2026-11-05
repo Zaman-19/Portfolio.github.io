@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Portal</title>
+<style>
+  :root{
+    --bg:#0a0f14;--panel:#111a22;--panel2:#16222c;--line:#22323f;
+    --fg:#e8f1f6;--muted:#8fa6b6;--accent:#38e0c8;--accent2:#4d8dff;--danger:#ff6b6b;--ok:#38d39f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(120% 80% at 80% 0%,#123040 0%,var(--bg) 55%) fixed;
+    color:var(--fg);font:15px/1.7 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:26px 16px 70px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 18px;letter-spacing:-.02em}
+
+  .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .tabs button{font:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:999px;
+    border:1px solid var(--line);background:#0f1922;color:var(--muted);padding:9px 20px}
+  .tabs button:hover{border-color:#2e4658;color:var(--fg)}
+  .tabs button.active{background:linear-gradient(100deg,var(--accent),var(--accent2));border:0;color:#04121a}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:16px;padding:20px 22px;margin-bottom:16px}
+  h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin:0 0 15px;font-weight:600}
+  .cols{display:grid;gap:16px}
+  @media(min-width:880px){.cols{grid-template-columns:1fr 1fr;align-items:start}}
+
+  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  label b{color:var(--fg);font-weight:600}
+  input[type=text],input[type=url],textarea{width:100%;padding:10px 12px;border-radius:10px;
+    border:1px solid var(--line);background:#0b141b;color:var(--fg);font:inherit;font-size:14px;
+    line-height:1.5;outline:none}
+  input:focus,textarea:focus{border-color:var(--accent)}
+  textarea{min-height:88px;resize:vertical}
+  .field{margin-bottom:15px}
+  .row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+
+  button{font:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:10px;
+    border:1px solid var(--line);background:#1b2832;color:var(--fg);padding:10px 16px}
+  button:hover{border-color:#2e4658}
+  button.primary{background:linear-gradient(100deg,var(--accent),var(--accent2));border:0;color:#04121a}
+  button.ghost{background:transparent}
+  button.mini{padding:5px 9px;font-size:12px;border-radius:8px}
+  button.danger{color:var(--danger);border-color:#3a2029;background:#1a1216}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+
+  .drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px 14px;text-align:center;
+    color:var(--muted);font-size:13px;line-height:1.8;cursor:pointer}
+  .drop:hover{border-color:var(--accent)}
+  .drop small{color:#6d8496}
+  .drop img{max-width:100%;max-height:160px;border-radius:8px;display:block;margin:0 auto 8px}
+
+  .list{display:grid;gap:9px}
+  .item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+    background:#0d171f;border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .item.withimg{grid-template-columns:60px 1fr auto}
+  .thumb{width:60px;height:38px;border-radius:7px;object-fit:cover;background:#132029}
+  .item h4{margin:0;font-size:14px;line-height:1.5}
+  .item small{color:var(--muted);display:block;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;max-width:52ch;font-size:12.5px}
+  .item .btns{display:flex;gap:5px}
+  .empty{padding:16px;text-align:center;color:var(--muted);font-size:13.5px;
+    border:1px dashed var(--line);border-radius:12px}
+
+  .status{min-height:20px;font-size:13px;color:var(--ok);margin-top:12px}
+  .status.err{color:var(--danger)}
+  .hint{font-size:12.5px;color:var(--muted);margin:12px 0 0;line-height:1.8}
+  .hint code{background:#0b141b;padding:1px 6px;border-radius:5px;font-size:12px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin Portal</h1>
+
+  <div class="tabs">
+    <button data-tab="project" class="active">Projects</button>
+    <button data-tab="achievement">Achievements</button>
+    <button data-tab="cv">CV</button>
+  </div>
+
+  <!-- ══════════ PROJECTS ══════════ -->
+  <section data-panel="project">
+    <div class="cols">
+      <div class="card">
+        <h2 id="pFormTitle">New project</h2>
+        <div class="field"><label><b>Name *</b></label><input id="pTitle" type="text" placeholder="e.g. Smart Attendance System" /></div>
+        <div class="field"><label><b>Description *</b></label><textarea id="pDesc" placeholder="What it is, what you built it with, what it does…"></textarea></div>
+        <div class="field">
+          <label><b>Image</b></label>
+          <div id="pDrop" class="drop">
+            <div id="pDropText">Click to choose or drag an image here<br /><small>Resized automatically</small></div>
+            <img id="pThumb" class="hidden" alt="" />
+          </div>
+          <input id="pFile" type="file" accept="image/*" class="hidden" />
+          <button id="pClearImg" class="ghost hidden" style="margin-top:8px;font-size:12px;padding:6px 10px">Remove image</button>
+        </div>
+        <div class="row">
+          <div><label>GitHub link</label><input id="pGithub" type="url" placeholder="https://github.com/…" /></div>
+          <div><label>Live link</label><input id="pDemo" type="url" placeholder="https://…" /></div>
+        </div>
+        <div class="actions">
+          <button id="pSave" class="primary">Add project</button>
+          <button id="pCancel" class="ghost hidden">Cancel</button>
+        </div>
+        <div id="pStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Project list</h2>
+        <div id="pList" class="list"></div>
+        <div class="actions" style="margin-top:14px">
+          <button id="pDownload" class="primary">⬇ Download projects.json</button>
+        </div>
+        <p class="hint">Replace <code>projects.json</code> in your GitHub repo with this file, then commit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ ACHIEVEMENTS ══════════ -->
+  <section data-panel="achievement" hidden>
+    <div class="cols">
+      <div class="card">
+        <h2 id="aFormTitle">New achievement</h2>
+        <div class="field"><label><b>Title *</b></label><input id="aTitle" type="text" placeholder="e.g. ICPC Dhaka Regional — Participant" /></div>
+        <div class="field"><label><b>Description</b></label><textarea id="aDesc" placeholder="Short description of the achievement…"></textarea></div>
+        <div class="row">
+          <div><label>Year / date</label><input id="aDate" type="text" placeholder="2026" /></div>
+          <div><label>Link</label><input id="aLink" type="url" placeholder="https://…" /></div>
+        </div>
+        <div class="actions">
+          <button id="aSave" class="primary">Add achievement</button>
+          <button id="aCancel" class="ghost hidden">Cancel</button>
+        </div>
+        <div id="aStatus" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Achievement list</h2>
+        <div id="aList" class="list"></div>
+        <div class="actions" style="margin-top:14px">
+          <button id="aDownload" class="primary">⬇ Download achievements.json</button>
+        </div>
+        <p class="hint">Add <code>achievements.json</code> to your GitHub repo (new file the first time), then commit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ CV ══════════ -->
+  <section data-panel="cv" hidden>
+    <div class="card" style="max-width:620px">
+      <h2>Update CV</h2>
+      <div id="cDrop" class="drop">
+        <div id="cDropText">Click to choose or drag a PDF here<br /><small>.pdf only</small></div>
+      </div>
+      <input id="cFile" type="file" accept="application/pdf" class="hidden" />
+      <div class="actions" style="margin-top:14px">
+        <button id="cDownload" class="primary" disabled>⬇ Download as Shakik-Zaman-CV.pdf</button>
+      </div>
+      <p class="hint">
+        Upload the downloaded file to your GitHub repo, replacing the old <code>Shakik-Zaman-CV.pdf</code>, then commit.
+        Keep the same filename so the CV button on your site works. Size and date on the card update by themselves.
+      </p>
+      <div id="cStatus" class="status"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var P_KEY = "sz_projects_v3", A_KEY = "sz_achievements_v1";
+  var MAX_W = 1400, Q = 0.82;
+
+  var DEFAULT_PROJECTS = [
+    { title: "Cpu Scheduler Calculator",
+      description: "CPU Scheduler is a system that manages and schedules processes in the CPU. It selects which process should run next based on different scheduling algorithms such as FCFS, SJF, Round Robin, and Priority Scheduling.",
+      image: "project1.png", github: "https://github.com/Zaman-19/cpu-scheduler", demo: "https://cpu-scheduler-o6pu.vercel.app/" },
+    { title: "Restaurant", description: "It's A Restaurant website",
+      image: "project2.png", github: "https://github.com/Zaman-19/Restaurant_Bootstrap", demo: "" },
+    { title: "My Portfolio", description: "My Portfolio is a personal website that showcases my skills, education, projects, experience, and achievements.",
+      image: "project3.png", github: "https://github.com/Zaman-19/My_Portfolio-", demo: "" }
+  ];
+
+  /* ---------- tabs ---------- */
+  var tabBtns = document.querySelectorAll(".tabs button");
+  Array.prototype.forEach.call(tabBtns, function (b) {
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(tabBtns, function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"), function (p) {
+        p.classList.toggle("hidden", p.getAttribute("data-panel") !== b.getAttribute("data-tab"));
+      });
+    });
+  });
+
+  function status(el, msg, err) {
+    el.textContent = msg || "";
+    el.className = "status" + (err ? " err" : "");
+    if (msg) setTimeout(function () { if (el.textContent === msg) el.textContent = ""; }, 6000);
+  }
+  function load(key, fallback) {
+    try { var r = localStorage.getItem(key); if (r) return JSON.parse(r); } catch (e) {}
+    return fallback;
+  }
+  function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  function mk(t, title, fn) {
+    var b = document.createElement("button");
+    b.className = "mini"; b.textContent = t; b.title = title;
+    b.addEventListener("click", fn); return b;
+  }
+
+  /* ══════════ PROJECTS ══════════ */
+  var projects = load(P_KEY, null) || DEFAULT_PROJECTS.slice();
+  var pEditing = -1, pImage = "";
+
+  function pRender() {
+    var box = $("pList"); box.innerHTML = "";
+    if (!projects.length) { box.innerHTML = '<div class="empty">No projects yet.</div>'; return; }
+    projects.forEach(function (p, i) {
+      var row = document.createElement("div");
+      row.className = "item" + (p.image ? " withimg" : "");
+      if (p.image) {
+        var im = document.createElement("img"); im.className = "thumb"; im.src = p.image; im.alt = "";
+        row.appendChild(im);
+      }
+      var mid = document.createElement("div");
+      var h = document.createElement("h4"); h.textContent = p.title || "(untitled)";
+      var s = document.createElement("small"); s.textContent = (p.description || "").replace(/\s+/g, " ");
+      mid.appendChild(h); mid.appendChild(s); row.appendChild(mid);
+
+      var btns = document.createElement("div"); btns.className = "btns";
+      btns.appendChild(mk("✎", "Edit", function () { pEdit(i); }));
+      btns.appendChild(mk("↑", "Move up", function () { pMove(i, -1); }));
+      btns.appendChild(mk("↓", "Move down", function () { pMove(i, 1); }));
+      var d = mk("✕", "Delete", function () { pDel(i); }); d.className = "danger mini";
+      btns.appendChild(d);
+      row.appendChild(btns);
+      box.appendChild(row);
+    });
+  }
+  function pMove(i, dir) {
+    var j = i + dir; if (j < 0 || j >= projects.length) return;
+    var t = projects[i]; projects[i] = projects[j]; projects[j] = t;
+    save(P_KEY, projects); pRender();
+  }
+  function pDel(i) {
+    if (!confirm('Delete "' + (projects[i].title || "this project") + '"?')) return;
+    projects.splice(i, 1); save(P_KEY, projects); pRender(); pReset();
+    status($("pStatus"), "Deleted. Download the file again to update your site.");
+  }
+  function pReset() {
+    pEditing = -1; pImage = "";
+    $("pTitle").value = ""; $("pDesc").value = ""; $("pGithub").value = ""; $("pDemo").value = "";
+    $("pFile").value = "";
+    $("pThumb").classList.add("hidden"); $("pThumb").removeAttribute("src");
+    $("pDropText").classList.remove("hidden"); $("pClearImg").classList.add("hidden");
+    $("pSave").textContent = "Add project"; $("pFormTitle").textContent = "New project";
+    $("pCancel").classList.add("hidden");
+  }
+  function pEdit(i) {
+    var p = projects[i];
+    pEditing = i; pImage = p.image || "";
+    $("pTitle").value = p.title || ""; $("pDesc").value = p.description || "";
+    $("pGithub").value = p.github || ""; $("pDemo").value = p.demo || "";
+    if (pImage) {
+      $("pThumb").src = pImage; $("pThumb").classList.remove("hidden");
+      $("pDropText").classList.add("hidden"); $("pClearImg").classList.remove("hidden");
+    }
+    $("pSave").textContent = "Update project";
+    $("pFormTitle").textContent = "Editing: " + (p.title || "");
+    $("pCancel").classList.remove("hidden");
+    $("pTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  $("pSave").addEventListener("click", function () {
+    var t = $("pTitle").value.trim(), d = $("pDesc").value.trim();
+    if (!t) { alert("Please enter a name."); return; }
+    if (!d) { alert("Please enter a description."); return; }
+    var item = { title: t, description: d, image: pImage || "",
+                 github: $("pGithub").value.trim(), demo: $("pDemo").value.trim() };
+    if (pEditing >= 0) projects[pEditing] = item; else projects.push(item);
+    save(P_KEY, projects); pRender(); pReset();
+    status($("pStatus"), "Saved. Now download the file.");
+  });
+  $("pCancel").addEventListener("click", pReset);
+
+  /* image */
+  $("pDrop").addEventListener("click", function () { $("pFile").click(); });
+  ["dragenter", "dragover"].forEach(function (e) {
+    $("pDrop").addEventListener(e, function (ev) { ev.preventDefault(); $("pDrop").style.borderColor = "var(--accent)"; });
+  });
+  ["dragleave", "drop"].forEach(function (e) {
+    $("pDrop").addEventListener(e, function (ev) { ev.preventDefault(); $("pDrop").style.borderColor = ""; });
+  });
+  $("pDrop").addEventListener("drop", function (e) {
+    var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) pFileChosen(f);
+  });
+  $("pFile").addEventListener("change", function () { if ($("pFile").files[0]) pFileChosen($("pFile").files[0]); });
+
+  function pFileChosen(f) {
+    if (!/^image\//.test(f.type)) { alert("Please choose an image file."); return; }
+    var url = URL.createObjectURL(f), img = new Image();
+    img.onload = function () {
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+      var c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      var d = c.toDataURL("image/webp", Q);
+      if (d.indexOf("data:image/webp") !== 0) d = c.toDataURL("image/jpeg", Q);
+      pImage = d;
+      $("pThumb").src = d; $("pThumb").classList.remove("hidden");
+      $("pDropText").classList.add("hidden"); $("pClearImg").classList.remove("hidden");
+      status($("pStatus"), "Image ready — " + Math.round((d.length - d.indexOf(",")) * .75 / 1024) + " KB");
+    };
+    img.src = url;
+  }
+  $("pClearImg").addEventListener("click", function () {
+    pImage = ""; $("pFile").value = "";
+    $("pThumb").classList.add("hidden"); $("pThumb").removeAttribute("src");
+    $("pDropText").classList.remove("hidden"); $("pClearImg").classList.add("hidden");
+  });
+
+  /* ══════════ ACHIEVEMENTS ══════════ */
+  var achs = load(A_KEY, null) || [];
+  var aEditing = -1;
+
+  function aRender() {
+    var box = $("aList"); box.innerHTML = "";
+    if (!achs.length) { box.innerHTML = '<div class="empty">No achievements yet.</div>'; return; }
+    achs.forEach(function (a, i) {
+      var row = document.createElement("div");
+      row.className = "item";
+      var mid = document.createElement("div");
+      var h = document.createElement("h4"); h.textContent = a.title || "(untitled)";
+      var s = document.createElement("small");
+      s.textContent = [a.date, a.description].filter(Boolean).join(" · ").replace(/\s+/g, " ");
+      mid.appendChild(h); mid.appendChild(s); row.appendChild(mid);
+
+      var btns = document.createElement("div"); btns.className = "btns";
+      btns.appendChild(mk("✎", "Edit", function () { aEdit(i); }));
+      btns.appendChild(mk("↑", "Move up", function () { aMove(i, -1); }));
+      btns.appendChild(mk("↓", "Move down", function () { aMove(i, 1); }));
+      var d = mk("✕", "Delete", function () { aDel(i); }); d.className = "danger mini";
+      btns.appendChild(d);
+      row.appendChild(btns);
+      box.appendChild(row);
+    });
+  }
+  function aMove(i, dir) {
+    var j = i + dir; if (j < 0 || j >= achs.length) return;
+    var t = achs[i]; achs[i] = achs[j]; achs[j] = t;
+    save(A_KEY, achs); aRender();
+  }
+  function aDel(i) {
+    if (!confirm("Delete this achievement?")) return;
+    achs.splice(i, 1); save(A_KEY, achs); aRender(); aReset();
+    status($("aStatus"), "Deleted. Download the file again to update your site.");
+  }
+  function aReset() {
+    aEditing = -1;
+    $("aTitle").value = ""; $("aDesc").value = ""; $("aDate").value = ""; $("aLink").value = "";
+    $("aSave").textContent = "Add achievement"; $("aFormTitle").textContent = "New achievement";
+    $("aCancel").classList.add("hidden");
+  }
+  function aEdit(i) {
+    var a = achs[i];
+    aEditing = i;
+    $("aTitle").value = a.title || ""; $("aDesc").value = a.description || "";
+    $("aDate").value = a.date || ""; $("aLink").value = a.link || "";
+    $("aSave").textContent = "Update achievement";
+    $("aFormTitle").textContent = "Editing: " + (a.title || "");
+    $("aCancel").classList.remove("hidden");
+    $("aTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  $("aSave").addEventListener("click", function () {
+    var t = $("aTitle").value.trim();
+    if (!t) { alert("Please enter a title."); return; }
+    var item = { title: t, description: $("aDesc").value.trim(),
+                 date: $("aDate").value.trim(), link: $("aLink").value.trim() };
+    if (aEditing >= 0) achs[aEditing] = item; else achs.push(item);
+    save(A_KEY, achs); aRender(); aReset();
+    status($("aStatus"), "Saved. Now download the file.");
+  });
+  $("aCancel").addEventListener("click", aReset);
+
+  /* ══════════ DOWNLOAD ══════════ */
+  function download(name, text) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+  $("pDownload").addEventListener("click", function () {
+    if (!projects.length) { alert("Add a project first."); return; }
+    download("projects.json", JSON.stringify(projects, null, 2));
+    status($("pStatus"), "projects.json downloaded.");
+  });
+  $("aDownload").addEventListener("click", function () {
+    download("achievements.json", JSON.stringify(achs, null, 2));
+    status($("aStatus"), "achievements.json downloaded.");
+  });
+
+  /* ══════════ CV ══════════ */
+  var cvFile = null;
+  $("cDrop").addEventListener("click", function () { $("cFile").click(); });
+  ["dragenter", "dragover"].forEach(function (e) {
+    $("cDrop").addEventListener(e, function (ev) { ev.preventDefault(); $("cDrop").style.borderColor = "var(--accent)"; });
+  });
+  ["dragleave", "drop"].forEach(function (e) {
+    $("cDrop").addEventListener(e, function (ev) { ev.preventDefault(); $("cDrop").style.borderColor = ""; });
+  });
+  $("cDrop").addEventListener("drop", function (e) {
+    var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) cChosen(f);
+  });
+  $("cFile").addEventListener("change", function () { if ($("cFile").files[0]) cChosen($("cFile").files[0]); });
+
+  function cChosen(f) {
+    if (f.type !== "application/pdf" && !/\.pdf$/i.test(f.name)) { alert("Please choose a PDF file."); return; }
+    cvFile = f;
+    $("cDropText").innerHTML = "";
+    var b = document.createElement("b"); b.textContent = f.name;
+    $("cDropText").appendChild(b);
+    $("cDropText").appendChild(document.createElement("br"));
+    $("cDropText").appendChild(document.createTextNode(Math.round(f.size / 1024) + " KB"));
+    $("cDownload").disabled = false;
+    status($("cStatus"), "PDF ready. Download it, then replace the file on GitHub.");
+  }
+  $("cDownload").addEventListener("click", function () {
+    if (!cvFile) return;
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(cvFile);
+    a.download = "Shakik-Zaman-CV.pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+
+  /* ══════════ INIT ══════════ */
+  pRender(); aRender(); pReset(); aReset();
+  if (typeof fetch === "function") {
+    fetch("achievements.json", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (l) {
+        if (Array.isArray(l) && !localStorage.getItem(A_KEY)) { achs = l; aRender(); }
+      })
+      .catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

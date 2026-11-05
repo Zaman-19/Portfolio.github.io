@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Cpu Scheduler Calculator",
+    "description": "CPU Scheduler is a system that manages and schedules processes in the CPU. It selects which process should run next based on different scheduling algorithms such as FCFS, SJF, Round Robin, and Priority Scheduling. It helps improve CPU utilization, reduce waiting time, and ensure efficient process execution.",
+    "image": "project1.png",
+    "github": "https://github.com/Zaman-19/cpu-scheduler",
+    "demo": "https://cpu-scheduler-o6pu.vercel.app/"
+  },
+  {
+    "title": "Restaurant",
+    "description": "It's A Restaurant website",
+    "image": "project2.png",
+    "github": "https://github.com/Zaman-19/Restaurant_Bootstrap",
+    "demo": ""
+  },
+  {
+    "title": "My Portfolio",
+    "description": "My Portfolio is a personal website that showcases my skills, education, projects, experience, and achievements. It provides an overview of my background and work, helping visitors learn more about me and my professional interests.",
+    "image": "project3.png",
+    "github": "https://github.com/Zaman-19/My_Portfolio-",
+    "demo": ""
+  }
+]
